@@ -12,11 +12,11 @@ export class ProductService {
     @InjectModel("Product") private readonly productModel: Model<Product>
   ) {}
 
-  insertProduct(title: string, description: string, price: number) {
+  async insertProduct(title: string, description: string, price: number) {
     const id = uuidv4();
     const newProduct = new this.productModel({ id, title, description, price });
-    this.products.push(newProduct);
-    return { id, title, description, price };
+    const data = await newProduct.save();
+    return data;
   }
 
   getProducts(query: any) {
