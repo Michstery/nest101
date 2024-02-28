@@ -13,49 +13,50 @@ export class ProductService {
   ) {}
 
   async insertProduct(title: string, description: string, price: number) {
-    const id = uuidv4();
-    const newProduct = new this.productModel({ id, title, description, price });
+    const productId = uuidv4();
+    const newProduct = new this.productModel({ productId, title, description, price });
     const data = await newProduct.save();
     return data;
   }
 
-  getProducts(query: any) {
+  async getProducts(query: any) {
     if (!query) {
-      return { products: [...this.products] };
+      const data = await this.productModel.find().exec();
+      return data as Product[]
     } else {
-      const product = this.products.find((prod) => prod.id === query);
+      const product = this.findProduct(query);
       if (!product) {
         throw new NotFoundException(
           `Could Not Find Product with the id ${query}`
         );
       }
-      return { product: { ...product } };
+      return product;
     }
   }
 
   updateProduct(query: any, title: string, desc: string, price: number) {
-    if (!query) {
-      throw new NotFoundException(
-        `The Product with the id ${query} no longer exists`
-      );
-    } else {
-      const [product, index] = this.findProduct(query);
-      const updatedProduct = { ...product };
+    // if (!query) {
+    //   throw new NotFoundException(
+    //     `The Product with the id ${query} no longer exists`
+    //   );
+    // } else {
+    //   const product = this.findProduct(query);
+    //   const updatedProduct = { ...product };
 
-      if (title) {
-        updatedProduct.title = title;
-      }
-      if (desc) {
-        updatedProduct.description = desc;
-      }
-      if (price) {
-        updatedProduct.price = price;
-      }
+    //   if (title) {
+    //     updatedProduct.title = title;
+    //   }
+    //   if (desc) {
+    //     updatedProduct.description = desc;
+    //   }
+    //   if (price) {
+    //     updatedProduct.price = price;
+    //   }
 
-      this.products[index] = updatedProduct;
+    //   //this.products = updatedProduct;
 
-      return this.products[index];
-    }
+    //   return this.products;
+    // }
   }
 
   deleteProduct(query: any) {
@@ -63,14 +64,12 @@ export class ProductService {
     this.products.splice(index, 1);
   }
 
-  private findProduct(id: string): [Product, number] {
-    const productIndex = this.products.findIndex(
-      (product) => product.id === id
-    );
-    const product = this.products[productIndex];
+  private async findProduct(id: string): Promise<Product> {
+
+    const product = await this.productModel.findOne({productId: id})
     if (!product) {
       throw new NotFoundException("Could Not Find Product.");
     }
-    return [product, productIndex];
+    return  product;
   }
 }

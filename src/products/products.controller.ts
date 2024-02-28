@@ -21,7 +21,7 @@ export class productsController {
   }
 
   @Get()
-  getProducts(@Query("productId") prodId: any) {
+  getProducts(@Query("productId") prodId: string) {
     const data = this.productService.getProducts(prodId);
     return data;
   }
