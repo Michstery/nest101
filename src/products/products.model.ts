@@ -6,7 +6,7 @@ export const productSchema = new mongoose.Schema({
   price: {type: Number, required: true},
   productId: {type: String, required: true}
 })
-export interface Product {
+export interface Product extends mongoose.Document {
   id: string;
   title: string;
   description: string;

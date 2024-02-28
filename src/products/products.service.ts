@@ -25,38 +25,33 @@ export class ProductService {
       return data as Product[]
     } else {
       const product = this.findProduct(query);
-      if (!product) {
-        throw new NotFoundException(
-          `Could Not Find Product with the id ${query}`
-        );
-      }
       return product;
     }
   }
 
-  updateProduct(query: any, title: string, desc: string, price: number) {
-    // if (!query) {
-    //   throw new NotFoundException(
-    //     `The Product with the id ${query} no longer exists`
-    //   );
-    // } else {
-    //   const product = this.findProduct(query);
-    //   const updatedProduct = { ...product };
+  async updateProduct(query: any, title: string, desc: string, price: number) {
+    if (!query) {
+      throw new NotFoundException(
+        `The Product with the id ${query} no longer exists`
+      );
+    } else {
+      const updatedProduct = await this.findProduct(query);
 
-    //   if (title) {
-    //     updatedProduct.title = title;
-    //   }
-    //   if (desc) {
-    //     updatedProduct.description = desc;
-    //   }
-    //   if (price) {
-    //     updatedProduct.price = price;
-    //   }
+      if (title) {
+        updatedProduct.title = title;
+      }
+      if (desc) {
+        updatedProduct.description = desc;
+      }
+      if (price) {
+        updatedProduct.price = price;
+      }
 
-    //   //this.products = updatedProduct;
+      //this.products = updatedProduct;
+    await updatedProduct.save();
 
-    //   return this.products;
-    // }
+      return updatedProduct;
+    }
   }
 
   deleteProduct(query: any) {
@@ -68,7 +63,7 @@ export class ProductService {
 
     const product = await this.productModel.findOne({productId: id})
     if (!product) {
-      throw new NotFoundException("Could Not Find Product.");
+      throw new NotFoundException(`Could Not Find Product with the id ${id}`);
     }
     return  product;
   }
