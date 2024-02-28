@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import { Product } from "./products.model";
 import { v4 as uuidv4 } from "uuid";
-import { productModule } from "./products.module";
 
 @Injectable()
 export class ProductService {
   private products: Product[] = [];
 
+  constructor(
+    @InjectModel("Product") private readonly productModel: Model<Product>
+  ) {}
+
   insertProduct(title: string, description: string, price: number) {
     const id = uuidv4();
-    const newProduct = new Product(id, title, description, price);
+    const newProduct = new this.productModel({ id, title, description, price });
     this.products.push(newProduct);
     return { id, title, description, price };
   }
@@ -29,45 +33,44 @@ export class ProductService {
     }
   }
 
-  updateProduct(query: any,title: string, desc: string, price: number) {
+  updateProduct(query: any, title: string, desc: string, price: number) {
     if (!query) {
       throw new NotFoundException(
         `The Product with the id ${query} no longer exists`
       );
     } else {
       const [product, index] = this.findProduct(query);
-      const updatedProduct = {...product}
+      const updatedProduct = { ...product };
 
-        if (title) {
-          updatedProduct.title = title
-        }
-        if (desc) {
-          updatedProduct.description = desc
-        }
-        if (price) {
-          updatedProduct.price = price
-        }
+      if (title) {
+        updatedProduct.title = title;
+      }
+      if (desc) {
+        updatedProduct.description = desc;
+      }
+      if (price) {
+        updatedProduct.price = price;
+      }
 
-      this.products[index] = updatedProduct
-      
-      return this.products[index]
+      this.products[index] = updatedProduct;
+
+      return this.products[index];
     }
-
-
   }
 
   deleteProduct(query: any) {
     const index = this.findProduct(query)[1];
-    this.products.splice(index, 1)
+    this.products.splice(index, 1);
   }
 
   private findProduct(id: string): [Product, number] {
-    const productIndex = this.products.findIndex(product => product.id === id);
+    const productIndex = this.products.findIndex(
+      (product) => product.id === id
+    );
     const product = this.products[productIndex];
     if (!product) {
-      throw new NotFoundException('Could Not Find Product.')
+      throw new NotFoundException("Could Not Find Product.");
     }
     return [product, productIndex];
   }
-
 }
